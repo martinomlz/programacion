@@ -1,21 +1,46 @@
-const express = require ('express');
+const express = require('express');
+const dbconnect = require('./database');
+const modeluser = require('./Usuarios');
 const app = express();
-const path = require('path');
-const dbconnect= require('./config');
 
-//routes
-//const routes=require('./routes/index.routes')
-//app.use(routes)
-app.use(require('./routes/index.routes'))
+const router= express.Router();
 
-//static files
-app.use(express.static(path.join(__dirname, '../public')))
-//app.use((req,res)=>{
-//    res.render('index.html')
-//})
+router.post("/", async (req,res)=> {
+    const body = req.body;
+    const respue = await modeluser.create(body);
+    res.send(respue)
 
-app.listen(3000,()=>{
-    console.log('servidor a la espera de conexion')
+ })
+
+
+router.get("/",async(req,res) =>{
+    const respue= await modeluser.find({})
+    res.send(respue)
 })
 
-dbconnect()
+router.get("/:id",async(req,res) =>{
+    const id=req.params.id;
+    const buscar= await modeluser.findById(id)
+    res.send(buscar)
+})
+
+router.put("/:id",async(req,res) =>{
+    const body= req.body;
+    const id=req.params.id;
+    const actualizar= await modeluser.findOneAndUpdate({ _id: id }, body)
+    res.send(actualizar)
+})
+
+router.delete("/:id",async(req,res) =>{
+    const id=req.params.id;
+    const eliminar= await modeluser.deleteOne( { _id : id })
+    res.send(eliminar)
+})
+
+
+app.use(express.json())
+app.use(router)
+app.listen(3001,() =>{
+ console.log("el servidor esta conectado en el puerto 3001");
+})
+dbconnect();
